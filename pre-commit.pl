@@ -8,11 +8,38 @@ use Data::Dumper;
 
 $Data::Dumper::Terse = 1;
 
-my $cached = qx(git diff --cached --name-status | awk '{ print \$2 }');
-my @files = split("\n", $cached);
-print "Diff files at index are:\n" . Dumper \@files;
+use lib './lib';
+use SwearingChecker;
 
-# Non zero condition to prevent commit
-if (1) {
-    exit 1;
+# Find diff files for this commit
+my $cached = qx(git --no-pager diff --cached --name-status | awk '{ print \$2 }');
+my @files = split("\n", $cached);
+
+# If nothing to check
+unless (scalar @files) {
+    _log("No files to check on pre-commit");
+    exit 0;
+}
+
+_log("Diff files at index are:\n" . Dumper \@files);
+
+my $checker = SwearingChecker->new();
+$checker->get_search_line();
+
+# Scan diff files
+for my $file (@files) {
+    $checker->scan_file($file);
+}
+
+# Print exit message and exit
+_log($checker->{'exit_msg'});
+exit $checker->{'exit_code'};
+
+sub _log {
+    my $str = shift;
+
+    return unless $str;
+
+    my $prefix = '[SWEARING CHECKER]: ';
+    print $prefix . $str . "\n";
 }
