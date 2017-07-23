@@ -1,0 +1,62 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+use Data::Dumper;
+use feature qw(say);
+use Fcntl;
+
+use Getopt::Long;
+use Cwd qw(getcwd abs_path);
+
+my %h = (
+	t => '',
+	type => '',
+	r => [],
+	repo => [],
+);
+GetOptions (
+	\%h,
+	't=s',
+	'type=s',
+	'r=s@',
+	'repo=s@',
+);
+@{$h{'repo'}} = (@{$h{'repo'}}, @{$h{'r'}});
+$h{'type'} = $h{'t'} if $h{'t'};
+
+my $cwd = getcwd();
+my $tpl = "$cwd/src/$h{'type'}.tpl";
+
+my $hook;
+do {
+	local $/ = undef;
+	die "Can't open hook template: $!" unless (open my $fh, '<', $tpl);
+	binmode $fh;
+	my $raw = <$fh>;
+	close $fh;
+	$hook = sprintf($raw, "$cwd/lib", "$cwd/badwords");
+} while (0);
+
+for my $git_repo (@{$h{'repo'}}) {
+	if (-d "$git_repo/.git/hooks") {
+		# Repo is cli
+		place_hook($hook => "$git_repo/.git/hooks/$h{'type'}");
+	}
+	elsif (-d "$git_repo/hooks") {
+		# Repo is bare
+		place_hook($hook => "$git_repo/hooks/$h{'type'}");
+	}
+	else {
+		say "Not a git repo [$git_repo]: skipping.";
+		next;
+	}
+}
+
+sub place_hook {
+	my ($hook, $file) = @_;
+
+	die "Can't write hook template: $!" unless (sysopen my $fh, $file, O_WRONLY|O_TRUNC|O_CREAT, 0755);
+	print $fh $hook;
+	close $fh;
+}

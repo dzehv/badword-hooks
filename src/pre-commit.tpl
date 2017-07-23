@@ -8,8 +8,9 @@ use Data::Dumper;
 
 $Data::Dumper::Terse = 1;
 
-use lib './lib';
-use SwearingChecker;
+use lib '%s';
+use BadwordChecker;
+my $dicts_dir = '%s';
 
 # Find diff files for this commit
 my $cached = qx(git --no-pager diff --cached --name-status | awk '{ print \$2 }');
@@ -21,9 +22,11 @@ unless (scalar @files) {
     exit 0;
 }
 
-_log("Diff files at index are:\n" . Dumper \@files);
+_log("You're going to commit files:\n" . Dumper \@files);
 
-my $checker = SwearingChecker->new();
+my $checker = BadwordChecker->new(
+    dicts => $dicts_dir,
+);
 $checker->get_search_line();
 
 # Scan diff files
@@ -40,6 +43,6 @@ sub _log {
 
     return unless $str;
 
-    my $prefix = '[SWEARING CHECKER]: ';
+    my $prefix = '[BADWORD CHECKER]: ';
     print $prefix . $str . "\n";
 }

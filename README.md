@@ -1,6 +1,5 @@
-# Pre commit hook
-Must be placed to local git repo: cp <pre-commit.pl> </path/to/.git/hooks/pre-commit>
+# Search for badwords with git hooks and prevent commit
 
-./lib folder with SwearingChecker.pm has to be rehardcoded in 'use lib' of pre-commit script
+Usage:
 
-TODO: Place SwearingChecker.pm and swearing_words.txt to known folder because of 'use lib' full path...
+./install --type pre-commit --repo test
