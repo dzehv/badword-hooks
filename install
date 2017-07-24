@@ -7,7 +7,7 @@ use feature qw(say);
 use Fcntl;
 
 use Getopt::Long;
-use Cwd qw(getcwd abs_path);
+use Cwd qw(getcwd);
 
 my %h = (
 	t => '',

@@ -21,7 +21,7 @@ my @cached = split("\n", $cached);
 my @files = grep {
     my $mtype = `file --mime-type $_` or die "Could not check file mime-type for [$_]: $!";
     my $types = qr{\:\s+\w*\/?(?:text|message|multipart|x-pkcs|xml|json|javascript|postscript|x-tex|x-empty)};
-    my $grep = $mtype =~ $types ? 1 : 0;
+    my $grep = (-f $_ && $mtype =~ $types ? 1 : 0);
     _log("File [$_] has not a plain mime type, skipping") unless $grep;
     $grep
 } @cached;
