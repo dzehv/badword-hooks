@@ -14,7 +14,17 @@ my $dicts_dir = '%s';
 
 # Find diff files for this commit
 my $cached = qx(git --no-pager diff --cached --name-status | awk '{ print \$2 }');
-my @files = split("\n", $cached);
+my @cached = split("\n", $cached);
+
+# Grep only plain files
+# TODO: add grep by mime types
+my @files = grep {
+    my $mtype = `file --mime-type $_` or die "Could not check file mime-type for [$_]: $!";
+    my $types = qr{\:\s+\w*\/?(?:text|message|multipart|x-pkcs|xml|json|javascript|postscript|x-tex|x-empty)};
+    my $grep = $mtype =~ $types ? 1 : 0;
+    _log("File [$_] has not a plain mime type, skipping") unless $grep;
+    $grep
+} @cached;
 
 # If nothing to check
 unless (scalar @files) {
@@ -22,7 +32,7 @@ unless (scalar @files) {
     exit 0;
 }
 
-_log("You're going to commit files:\n" . Dumper \@files);
+_log("Have to check files:\n" . Dumper \@files);
 
 my $checker = BadwordChecker->new(
     dicts => $dicts_dir,

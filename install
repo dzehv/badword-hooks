@@ -23,7 +23,14 @@ GetOptions (
 	'repo=s@',
 );
 @{$h{'repo'}} = (@{$h{'repo'}}, @{$h{'r'}});
+unless (scalar @{$h{'repo'}}) {
+    say "No repos to install";
+    exit 1;
+}
 $h{'type'} = $h{'t'} if $h{'t'};
+
+# Default script type is pre-commit
+$h{'type'} ||= 'pre-commit';
 
 my $cwd = getcwd();
 my $tpl = "$cwd/src/$h{'type'}.tpl";
@@ -41,11 +48,21 @@ do {
 for my $git_repo (@{$h{'repo'}}) {
 	if (-d "$git_repo/.git/hooks") {
 		# Repo is cli
-		place_hook($hook => "$git_repo/.git/hooks/$h{'type'}");
+        my $file = "$git_repo/.git/hooks/$h{'type'}";
+        if (-e $file) {
+            say "WARNING: File [$file] existing, will be replaced!";
+        }
+        say "Installing $h{'type'} hook to repo: $git_repo";
+		place_hook($hook => $file);
 	}
 	elsif (-d "$git_repo/hooks") {
 		# Repo is bare
-		place_hook($hook => "$git_repo/hooks/$h{'type'}");
+        my $file = "$git_repo/hooks/$h{'type'}";
+        if (-e $file) {
+            say "WARNING: File [$file] existing, will be replaced!";
+        }
+        say "Installing $h{'type'} hook to repo: $git_repo";
+		place_hook($hook => $file);
 	}
 	else {
 		say "Not a git repo [$git_repo]: skipping.";

@@ -28,7 +28,7 @@ sub get_search_line {
     my $self = shift;
 
     my $search_line = '(?:^|\W|_)(';
-    
+
     my @files = _search_files($self->{'dicts'});
     die "No dictionaries to read: exiting" unless scalar @files;
 
