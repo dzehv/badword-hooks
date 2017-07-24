@@ -5,9 +5,8 @@ use warnings;
 use File::Find qw(find);
 use Data::Dumper;
 
-our $VERSION = 0.0.1;
+our $VERSION = 0.0.2;
 
-# Push dictionary files to @dicts key
 sub new {
     my ($class, %params) = @_;
 
@@ -75,13 +74,13 @@ sub scan_file {
         if ($sig =~ /$self->{'search_line'}/) {
             # Set non zero exit code if as least one match found
             $self->{'exit_code'} = 1;
-            $self->{'exit_msg'} .= "\n========== Detected Swearing Word!!! ==========\n";
-            $self->{'exit_msg'} .= "Swearing word: $1\n";
+            $self->{'exit_msg'} .= "\n========== Detected Bad Word!!! ==========\n";
+            $self->{'exit_msg'} .= "Bad word: $1\n";
             $self->{'exit_msg'} .= "File: $file\n";
             $self->{'exit_msg'} .= "String number: $line_number\n";
             $self->{'exit_msg'} .= "================================================\n";
             unless ($self->{'check_all'}) {
-                # Don't check every file from diff
+                # If there no need to check every file from diff output
                 last;
             }
         }

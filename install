@@ -5,7 +5,6 @@ use warnings;
 use Data::Dumper;
 use feature qw(say);
 use Fcntl;
-
 use Getopt::Long;
 use Cwd qw(getcwd);
 
@@ -23,8 +22,9 @@ GetOptions (
 	'repo=s@',
 );
 @{$h{'repo'}} = (@{$h{'repo'}}, @{$h{'r'}});
+
 unless (scalar @{$h{'repo'}}) {
-    say "No repos to install";
+    say "No git repos specified to install";
     exit 1;
 }
 $h{'type'} = $h{'t'} if $h{'t'};
